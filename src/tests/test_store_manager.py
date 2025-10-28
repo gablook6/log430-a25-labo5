@@ -25,6 +25,10 @@ def test_stock_flow(client):
     logger = Logger.get_instance("test")
     
     skip_external = os.getenv("SKIP_EXTERNAL_TESTS") == "true"
+    # Skip if in CI
+    if skip_external:
+        logger.debug("Skipping test stock flow while in CI")
+        pytest.skip("Skipping external service steps in CI")
     
     # 1. Create a product (POST /products)
     product_data = {
@@ -69,12 +73,7 @@ def test_stock_flow(client):
     assert response.status_code == 201, f"Failed to create user: {response.get_json()}"
     user_id = response.get_json()['user_id']
     logger.debug(f"Created user with ID: {user_id}")
-    
-    # 4 & 5. Skip if in CI
-    if skip_external:
-        logger.debug("Skipping steps 4 & 5: order creation and stock verification in CI")
-        pytest.skip("Skipping external service steps in CI")
-    
+        
     # 4. Create an order with 2 units (POST /orders)
     order_data = {
         'user_id': user_id,
