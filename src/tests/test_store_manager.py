@@ -3,7 +3,7 @@ Tests for orders manager
 SPDX - License - Identifier: LGPL - 3.0 - or -later
 Auteurs : Gabriel C. Ullmann, Fabio Petrillo, 2025
 """
-
+import os
 import json
 from logger import Logger
 import pytest
@@ -23,6 +23,8 @@ def test_health(client):
 def test_stock_flow(client):
     """Smoke test for complete stock management flow"""
     logger = Logger.get_instance("test")
+    
+    skip_external = os.getenv("SKIP_EXTERNAL_TESTS") == "true"
     
     # 1. Create a product (POST /products)
     product_data = {
@@ -67,6 +69,11 @@ def test_stock_flow(client):
     assert response.status_code == 201, f"Failed to create user: {response.get_json()}"
     user_id = response.get_json()['user_id']
     logger.debug(f"Created user with ID: {user_id}")
+    
+    # 4 & 5. Skip if in CI
+    if skip_external:
+        logger.debug("Skipping steps 4 & 5: order creation and stock verification in CI")
+        pytest.skip("Skipping external service steps in CI")
     
     # 4. Create an order with 2 units (POST /orders)
     order_data = {

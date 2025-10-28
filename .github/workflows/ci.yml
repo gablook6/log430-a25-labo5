@@ -9,6 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: Serveur Personelle
+    env:
+      SKIP_EXTERNAL_TESTS: "true"    # set this in CI only
     
     steps:
       - name: Checkout
